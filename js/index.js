@@ -45,6 +45,9 @@ module.exports = {
   get AppInviteDialog() {
     return require('./FBAppInviteDialog');
   },
+  get AppLinkData() {
+    return require('./FBAppLinkData');
+  },
   get GameRequestDialog() {
     return require('./FBGameRequestDialog');
   },
