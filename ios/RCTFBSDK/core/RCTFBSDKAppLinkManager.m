@@ -50,7 +50,7 @@ RCT_EXPORT_METHOD(fetchDeferredAppLinkData:(RCTPromiseResolveBlock)resolve rejec
     }
   };
 
-  [FBSDKAppLinkUtility fetchDeferredAppLink:handler]
+  [FBSDKAppLinkUtility fetchDeferredAppLink:handler];
 }
 
 @end
