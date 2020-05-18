@@ -48,7 +48,7 @@ public class FBAppLinkDataModule extends ReactContextBaseJavaModule {
          * @param appLinkData The app link data that was fetched. Null if none was found.
          */
 		@Override
-        void onDeferredAppLinkDataFetched(AppLinkData appLinkData) {
+        public void onDeferredAppLinkDataFetched(AppLinkData appLinkData) {
             if (appLinkData == null) {
 			    mPromise.resolve(null);
             } else {
