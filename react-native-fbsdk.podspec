@@ -9,22 +9,22 @@ Pod::Spec.new do |s|
   s.author        = { 'dzhuowen' => 'dzhuowen@fb.com' }
   s.license       = package['license']
   s.homepage      = package['homepage']
-  s.source        = { :git => 'https://github.com/facebook/react-native-fbsdk.git' }
-  s.platform      = :ios, '7.0'
+  s.source        = { :git => 'https://github.com/facebook/react-native-fbsdk.git', :tag => "v#{package['version']}" }
+  s.platforms     = { :ios => "9.0", :tvos => "9.2" }
   s.dependency      'React'
 
   s.subspec 'Core' do |ss|
-    ss.dependency     'FBSDKCoreKit'
+    ss.dependency     'FBSDKCoreKit', '~> 7.0'
     ss.source_files = 'ios/RCTFBSDK/core/*.{h,m}'
   end
 
   s.subspec 'Login' do |ss|
-    ss.dependency     'FBSDKLoginKit'
+    ss.dependency     'FBSDKLoginKit', '~> 7.0'
     ss.source_files = 'ios/RCTFBSDK/login/*.{h,m}'
   end
 
   s.subspec 'Share' do |ss|
-    ss.dependency     'FBSDKShareKit'
+    ss.dependency     'FBSDKShareKit', '~> 7.0'
     ss.source_files = 'ios/RCTFBSDK/share/*.{h,m}'
   end
 end
