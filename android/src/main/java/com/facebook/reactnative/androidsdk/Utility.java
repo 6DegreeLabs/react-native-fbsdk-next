@@ -43,6 +43,7 @@ import com.facebook.share.model.SharePhoto;
 import com.facebook.share.model.SharePhotoContent;
 import com.facebook.share.model.ShareVideo;
 import com.facebook.share.model.ShareVideoContent;
+import com.facebook.share.model.ShareStoryContent;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -110,6 +111,8 @@ public final class Utility {
                 shareContent = buildSharePhotoContent(shareContentMap);
             } else if (contentType.equals("video")) {
                 shareContent = buildShareVideoContent(shareContentMap);
+            } else if (contentType.equals("story")) {
+                shareContent = buildShareStoryContent(shareContentMap);
             } else if (contentType.equals("open-graph")) {
                 shareContent = buildShareOpenGraphContent(shareContentMap);
             }
@@ -212,6 +215,25 @@ public final class Utility {
             contentBuilder.setVideo(buildShareVideo(shareVideoContent.getMap("video")));
         }
         appendGenericContent(contentBuilder, shareVideoContent);
+        return contentBuilder.build();
+    }
+
+    public static ShareStoryContent buildShareStoryContent(ReadableMap shareStoryContent) {
+        ShareStoryContent.Builder  contentBuilder = new ShareStoryContent.Builder();
+        if (shareStoryContent.hasKey("backgroundUrl")) {
+            SharePhoto backgroundPhoto = new SharePhoto.Builder().setImageUrl(Uri.parse(shareStoryContent.getString("backgroundUrl"))).build();
+            contentBuilder.setBackgroundAsset(backgroundPhoto);
+        }
+        if (shareStoryContent.hasKey("stickerUrl")) {
+            SharePhoto stickerPhoto = new SharePhoto.Builder().setImageUrl(Uri.parse(shareStoryContent.getString("stickerUrl"))).build();
+            contentBuilder.setStickerAsset(stickerPhoto);
+        }
+        if (shareStoryContent.hasKey("backgroundColors")) {
+            contentBuilder.setBackgroundColorList(reactArrayToStringList(shareStoryContent.getArray("backgroundColors")));
+        }
+        String url = getValueOrNull(shareStoryContent, "contentUrl");
+        contentBuilder.setAttributionLink(url);
+        appendGenericContent(contentBuilder, shareStoryContent);
         return contentBuilder.build();
     }
 
