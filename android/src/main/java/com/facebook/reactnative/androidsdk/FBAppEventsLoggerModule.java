@@ -20,7 +20,7 @@
 
 package com.facebook.reactnative.androidsdk;
 
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import com.facebook.appevents.AppEventsConstants;
 import com.facebook.appevents.AppEventsLogger;
@@ -29,6 +29,7 @@ import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableMap;
+import com.facebook.react.module.annotations.ReactModule;
 
 import java.math.BigDecimal;
 import java.util.Currency;
@@ -102,7 +103,10 @@ import java.util.Currency;
  * </ul>
  * </p>
  */
+@ReactModule(name = FBAppEventsLoggerModule.NAME)
 public class FBAppEventsLoggerModule extends ReactContextBaseJavaModule {
+
+    public static final String NAME = "FBAppEventsLogger";
 
     private AppEventsLogger mAppEventLogger;
     private ReactApplicationContext mReactContext;
@@ -119,7 +123,7 @@ public class FBAppEventsLoggerModule extends ReactContextBaseJavaModule {
 
     @Override
     public String getName() {
-        return "FBAppEventsLogger";
+        return NAME;
     }
 
     /**
@@ -222,6 +226,31 @@ public class FBAppEventsLoggerModule extends ReactContextBaseJavaModule {
      public void updateUserProperties(ReadableMap parameters) {
        mAppEventLogger.updateUserProperties(Arguments.toBundle(parameters), null);
      }
+
+    private @Nullable String getNullableString(ReadableMap data, String key) {
+      return data.hasKey(key) ? data.getString(key) : null;
+    }
+
+    /**
+     * Set additional data about the user to increase chances of matching a Facebook user.
+     *
+     * @param userData Key-value pairs representing user data and their values.
+     */
+    @ReactMethod
+    public void setUserData(ReadableMap userData) {
+      AppEventsLogger.setUserData(
+        getNullableString(userData, "email"),
+        getNullableString(userData, "firstName"),
+        getNullableString(userData, "lastName"),
+        getNullableString(userData, "phone"),
+        getNullableString(userData, "dateOfBirth"),
+        getNullableString(userData, "gender"),
+        getNullableString(userData, "city"),
+        getNullableString(userData, "state"),
+        getNullableString(userData, "zip"),
+        getNullableString(userData, "country")
+      );
+    }
 
     /**
      * Explicitly flush any stored events to the server.  Implicit flushes may happen depending on

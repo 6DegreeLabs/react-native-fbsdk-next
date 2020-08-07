@@ -41,7 +41,7 @@ RCT_EXPORT_MODULE(FBAppLinkData);
 
 RCT_EXPORT_METHOD(fetchDeferredAppLinkData:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
 {
-  FBSDKDeferredAppLinkHandler handler = ^(NSURL *url, NSError *error) {
+  FBSDKURLBlock handler = ^(NSURL *url, NSError *error) {
     if (error) {
       resolve(nil);
     } else {
