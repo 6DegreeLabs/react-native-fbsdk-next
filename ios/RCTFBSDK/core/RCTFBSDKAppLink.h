@@ -16,41 +16,9 @@
 // IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+#import <React/RCTBridgeModule.h>
 
-#import <Foundation/Foundation.h>
-
-#import "RCTFBSDKAppLinkManager.h"
 #import <FBSDKCoreKit/FBSDKCoreKit.h>
 
-#import "RCTFBSDKAccessToken.h"
-
-#import <React/RCTUtils.h>
-
-#import "RCTConvert+FBSDKAccessToken.h"
-
-@implementation RCTFBSDKAppLinkManager
-
-RCT_EXPORT_MODULE(FBAppLinkData);
-
-- (dispatch_queue_t)methodQueue
-{
-  return dispatch_get_main_queue();
-}
-
-#pragma mark - React Native Methods
-
-RCT_EXPORT_METHOD(fetchDeferredAppLinkData:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
-{
-  FBSDKURLBlock handler = ^(NSURL *url, NSError *error) {
-    if (error) {
-      resolve(nil);
-    } else {
-      NSString *urlString = [url absoluteString];
-      resolve(urlString);
-    }
-  };
-
-  [FBSDKAppLinkUtility fetchDeferredAppLink:handler];
-}
-
+@interface RCTFBSDKAppLink : NSObject <RCTBridgeModule>
 @end

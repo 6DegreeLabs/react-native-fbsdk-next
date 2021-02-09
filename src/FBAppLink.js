@@ -22,10 +22,10 @@
  */
 'use strict';
 
-const AppLinkData = require('react-native').NativeModules.FBAppLinkData;
+const AppLink = require('react-native').NativeModules.FBAppLink;
 
 module.exports = {
-  async fetchDeferredAppLinkData(): Promise<?string> {
-    return await AppLinkData.fetchDeferredAppLinkData();
+  fetchDeferredAppLink(): Promise<string | null> {
+    return AppLink.fetchDeferredAppLink();
   },
 };
