@@ -45,9 +45,6 @@ module.exports = {
   get AppLink() {
     return require('./FBAppLink');
   },
-  get AppLinkData() {
-    return require('./FBAppLinkData');
-  },
   get GameRequestDialog() {
     return require('./FBGameRequestDialog');
   },
