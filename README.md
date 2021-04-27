@@ -1,4 +1,6 @@
-# React Native FBSDK
+# React Native FBSDK Next
+
+This project aims to keep continuity of the [React Native FBSDK](https://github.com/facebook/react-native-fbsdk) from Facebook. As Facebook dropped support from it. As a community for this is our effort in order to keep upgrading and improving support for this module.
 
 React Native FBSDK is a wrapper around the iOS Facebook SDK and Android Facebook SDK, allowing for Facebook integration in [React Native](https://facebook.github.io/react-native/) apps. Access to native components, from login to sharing, is provided entirely through documented JavaScript modules so you don't have to call a single native function directly.
 
@@ -16,23 +18,24 @@ Functionality is provided through one single npm package so you can use it for b
 ## React Native Compatibility
 To use this library you need to ensure you match up with the correct version of React Native you are using.
 
-| `react-native-fbsdk` version | Required React Native Version                                                     |
-| ----------------------------------------- | --------------------------------------------------------------------------------- |
-| `>= 1.0.0`                                   | `>= 0.60`                                                                     |
-| `<= 0.10`                                   | `<= 0.59.x`                                                                         |
+| FB SDK    | lib version                           | Required React Native Version |
+| --------- | ------------------------------------- | ----------------------------- |
+| >= 9.0.0+ | `react-native-fbsdk-next` `>= 3.0.1`  | `>= 0.60`                     |
+| <= 8.0.1  | `react-native-fbsdk` `>= 1.0.0`       | `>= 0.60`                     |
+| <= 8.0.1  | `react-native-fbsdk` `<= 0.10`        | `<= 0.59.x`                   |
 
 ### 1. Install the library
 
 using either Yarn:
 
 ```
-yarn add react-native-fbsdk
+yarn add react-native-fbsdk-next
 ```
 
 or npm:
 
 ```
-npm install --save react-native-fbsdk
+npm install --save react-native-fbsdk-next
 ```
 
 ### 2. Link
@@ -51,10 +54,7 @@ $ cd ios/ && pod install
 
 - **React Native <= 0.59**
 
-
-```bash
-$ react-native link react-native-fbsdk
-```
+> For support with React Native <= 0.59, please refer to [React Native FBSDK](https://github.com/facebook/react-native-fbsdk) 
 
 If you can't or don't want to use the CLI tool, you can also manually link the library using the instructions below (click on the arrow to show them):
 
@@ -76,15 +76,15 @@ Make the following changes:
 
 #### `android/settings.gradle`
 ```groovy
-include ':react-native-fbsdk'
-project(':react-native-fbsdk').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-fbsdk/android')
+include ':react-native-fbsdk-next'
+project(':react-native-fbsdk-next').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-fbsdk-next/android')
 ```
 
 #### `android/app/build.gradle`
 ```groovy
 dependencies {
    ...
-   implementation project(':react-native-fbsdk')
+   implementation project(':react-native-fbsdk-next')
 }
 ```
 
@@ -162,6 +162,39 @@ The `AppDelegate.m` file can only have one method for `openUrl`. If you're also 
 
 ## Usage
 
+### SDK Initialization
+
+To comply with Apple privacy requirements, for iOS the `autoInitEnabled` option is removed from [facebook-ios-sdk#v9.0.0](https://github.com/facebook/facebook-ios-sdk/blob/master/CHANGELOG.md#900).
+
+Using this module, there are two options to comply with this requirement, one is platform-neutral and can be used from your javascript code whenever it makes sense for your app, and one is native.
+
+#### Platform-neutral SDK initialization
+
+If you do not need to handle a [GDPR-type opt-in flow](https://developers.facebook.com/docs/app-events/gdpr-compliance), on iOS you should include the following javascript code as early in startup as possible. For Android auto-init is the default still, so this is not strictly necessary for Android but will work.
+
+If you need to handle a GDPR-type flow, make sure your SDK is configured natively to delay all logging activity according to [the GDPR instructions](https://developers.facebook.com/docs/app-events/gdpr-compliance), ask for user consent, and after obtaining consent include code similar to this:
+
+```js
+import { Settings } from 'react-native-fbsdk-next';
+
+// Ask for consent first if necessary
+// Possibly only do this for iOS if no need to handle a GDPR-type flow
+Settings.initializeSDK();
+```
+
+#### iOS Native Initialization
+
+If you would like to initialize the Facebook SDK even earlier in startup for iOS, you need to include this code in your AppDelegate.m file now that auto-initialization is removed.
+
+```objective-c
+- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
+{
+  [FBSDKApplicationDelegate initializeSDK:launchOptions]; // <- add this
+
+  // your other stuff
+}
+```
+
 ### [Login](https://developers.facebook.com/docs/facebook-login)
 
 #### Login Button + Access Token
@@ -169,7 +202,7 @@ The `AppDelegate.m` file can only have one method for `openUrl`. If you're also 
 ```js
 import React, { Component } from 'react';
 import { View } from 'react-native';
-import { LoginButton, AccessToken } from 'react-native-fbsdk';
+import { LoginButton, AccessToken } from 'react-native-fbsdk-next';
 
 export default class Login extends Component {
   render() {
@@ -205,7 +238,7 @@ You can also use the Login Manager with custom UI to perform Login.
 ```js
 // ...
 
-import { LoginManager } from "react-native-fbsdk";
+import { LoginManager } from "react-native-fbsdk-next";
 
 // ...
 
@@ -236,7 +269,7 @@ All of the dialogs included are used in a similar way, with differing content ty
 ```js
 // ...
 
-import { ShareDialog } from 'react-native-fbsdk';
+import { ShareDialog } from 'react-native-fbsdk-next';
 
 // ...
 
@@ -279,7 +312,7 @@ shareLinkWithShareDialog() {
 See [SharePhotoContent](/js/models/FBSharePhotoContent.js) and [SharePhoto](/js/models/FBSharePhoto.js) to refer other options.
 
 ```js
-const FBSDK = require('react-native-fbsdk');
+const FBSDK = require('react-native-fbsdk-next');
 const {
   ShareApi,
 } = FBSDK;
@@ -300,7 +333,7 @@ ShareDialog.show(tmp.state.sharePhotoContent);
 See [ShareVideoContent](/js/models/FBShareVideoContent.js) and [ShareVideo](/js/models/FBShareVideo.js) to refer other options.
 
 ```js
-const FBSDK = require('react-native-fbsdk');
+const FBSDK = require('react-native-fbsdk-next');
 const {
   ShareApi,
 } = FBSDK;
@@ -323,7 +356,7 @@ Your app must have the `publish_actions` permission approved to share through th
 ```js
 // ...
 
-import { ShareApi } from 'react-native-fbsdk';
+import { ShareApi } from 'react-native-fbsdk-next';
 
 // ...
 
@@ -354,19 +387,24 @@ ShareApi.canShare(this.state.shareLinkContent).then(
 );
 ```
 
-### [Analytics](https://developers.facebook.com/docs/app-events)
+### [App Events](https://developers.facebook.com/docs/app-events)
 
 #### App events
 
 ```js
 // ...
 
-import { AppEventsLogger } from "react-native-fbsdk";
+import { AppEventsLogger } from "react-native-fbsdk-next";
 
 // ...
 
 // Log a $15 purchase.
 AppEventsLogger.logPurchase(15, "USD", { param: "value" });
+
+// Log standard event. e.g. completed registration
+AppEventsLogger.logEvent(AppEventsLogger.AppEvents.CompletedRegistration, {
+  [AppEventsLogger.AppEventParams.RegistrationMethod]: "email",
+});
 ```
 
 ### [Graph API](https://developers.facebook.com/docs/graph-api)
@@ -376,7 +414,7 @@ AppEventsLogger.logPurchase(15, "USD", { param: "value" });
 ```js
 // ...
 
-import { GraphRequest, GraphRequestManager } from 'react-native-fbsdk';
+import { GraphRequest, GraphRequestManager } from 'react-native-fbsdk-next';
 
 // ...
 
@@ -420,7 +458,3 @@ See the [CONTRIBUTING](./CONTRIBUTING.md) file for how to help out.
 ## License
 
 See the LICENSE file.
-
-## Platform Policy
-
-Developers looking to integrate with the Facebook Platform should familiarize themselves with the [Facebook Platform Policy](https://developers.facebook.com/policy/).
