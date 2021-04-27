@@ -22,40 +22,47 @@
  */
 'use strict';
 
-import type {ShareLinkContent} from './FBShareLinkContent';
-import type {ShareOpenGraphContent} from './FBShareOpenGraphContent';
-import type {SharePhotoContent} from './FBSharePhotoContent';
-import type {ShareVideoContent} from './FBShareVideoContent';
-import type {ShareStoryContent} from './FBShareStoryContent';
+import type {ShareContentCommonParameters} from './FBShareContent';
 
-export type ShareContent =
-  | ShareLinkContent
-  | SharePhotoContent
-  | ShareVideoContent
-  | ShareStoryContent
-  | ShareOpenGraphContent;
 /**
- * A base interface for content to be shared.
+ * A model for photo content to be shared.
  */
-export type ShareContentCommonParameters = {
+export type ShareStoryContent = {
   /**
-   * List of IDs for taggable people to tag with this content.
+   * The type of content to be shared is photo.
    */
-  peopleIds?: Array<string>,
+  contentType: 'story',
 
   /**
-   * The ID for a place to tag with this content.
+   * Common parameters for share content;
    */
-  placeId?: string,
+  commonParameters?: ShareContentCommonParameters,
 
   /**
-   * A value to be added to the referrer URL when a person follows a link from
-   * this shared content on feed.
+   * URL for the content being shared.
    */
-  ref?: string,
+  contentUrl?: string,
 
   /**
-   * A hashtag to be added to the share interface. The hashtag must be 32 characters or less.
+   * Uri to an image (JPG, PNG) or video (H.264, H.265, WebM). Recommended
+   * image dimensions: device fullscreen or smaller. Videos can be 1080p and
+   * up to 20 seconds in duration. The Uri needs to be a content Uri to a local
+   * file on device.
    */
-  hashtag?: string,
+  backgroundUrl?: string,
+
+  /**
+   * Uri to an image (JPG, PNG). Recommended dimensions: 640x480. This image
+   * will be placed as a sticker over the background. The Uri needs to be a
+   * content Uri to a local file on device.
+   */
+  stickerUrl?: string,
+
+  /**
+   * A list of hex string color values used to generate a gradient from top to
+   * bottom, in the order in which they appear in the list. Note that if you
+   * are passing a background asset, the asset will be used and the color list
+   * will be ignored.
+   */
+  backgroundColors?: Array<String>,
 };
