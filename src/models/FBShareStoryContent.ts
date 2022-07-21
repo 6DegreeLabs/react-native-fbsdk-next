@@ -61,5 +61,5 @@ export type ShareStoryContent = {
    * are passing a background asset, the asset will be used and the color list
    * will be ignored.
    */
-  backgroundColors?: Array<String>;
+  backgroundColors?: Array<string>;
 };
