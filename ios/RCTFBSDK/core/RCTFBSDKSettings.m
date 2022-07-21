@@ -23,29 +23,34 @@ RCT_EXPORT_MODULE(FBSettings);
 
 RCT_EXPORT_METHOD(getAdvertiserTrackingEnabled:(RCTPromiseResolveBlock)resolve rejector:(RCTPromiseRejectBlock)reject)
 {
-  BOOL ATE = [FBSDKSettings isAdvertiserTrackingEnabled];
+  BOOL ATE = FBSDKSettings.sharedSettings.isAdvertiserTrackingEnabled;
   resolve(@(ATE));
 }
 
 RCT_EXPORT_METHOD(setAdvertiserTrackingEnabled:(BOOL)ATE resolver:(RCTPromiseResolveBlock)resolve rejector:(RCTPromiseRejectBlock)reject)
 {
-  BOOL result = [FBSDKSettings setAdvertiserTrackingEnabled:ATE];
-  resolve(@(result));
+  FBSDKSettings.sharedSettings.advertiserTrackingEnabled = ATE;
+  resolve(@(true)); // true means successfully changed
 }
 
-RCT_EXPORT_METHOD(setDataProcessingOptions:(nullable NSStringArray *)options)
+RCT_EXPORT_METHOD(setDataProcessingOptions:(nullable NSArray<NSString *> *)options)
 {
-  [FBSDKSettings setDataProcessingOptions:options];
+  [FBSDKSettings.sharedSettings setDataProcessingOptions:options];
 }
 
-RCT_EXPORT_METHOD(setDataProcessingOptions:(nullable NSStringArray *)options country:(int)country state:(int)state)
+RCT_EXPORT_METHOD(setDataProcessingOptions:(nullable NSArray<NSString *> *)options country:(int)country state:(int)state)
 {
-  [FBSDKSettings setDataProcessingOptions:options country:country state:state];
+  [FBSDKSettings.sharedSettings setDataProcessingOptions:options country:country state:state];
 }
 
 RCT_EXPORT_METHOD(initializeSDK)
 {
-  [FBSDKApplicationDelegate initializeSDK:nil];
+  [FBSDKApplicationDelegate.sharedInstance initializeSDK];
+}
+
+RCT_EXPORT_METHOD(setAppID:(NSString *)appID)
+{
+  [FBSDKSettings.sharedSettings setAppID:appID];
 }
 
 @end

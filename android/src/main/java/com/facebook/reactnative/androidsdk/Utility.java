@@ -24,21 +24,17 @@ import android.net.Uri;
 
 import com.facebook.AccessToken;
 import com.facebook.AccessTokenSource;
+import com.facebook.Profile;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.ReadableMapKeySetIterator;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
-import com.facebook.share.model.AppGroupCreationContent;
-import com.facebook.share.model.AppInviteContent;
 import com.facebook.share.model.GameRequestContent;
 import com.facebook.share.model.ShareContent;
 import com.facebook.share.model.ShareLinkContent;
 import com.facebook.share.model.ShareHashtag;
-import com.facebook.share.model.ShareOpenGraphAction;
-import com.facebook.share.model.ShareOpenGraphContent;
-import com.facebook.share.model.ShareOpenGraphObject;
 import com.facebook.share.model.SharePhoto;
 import com.facebook.share.model.SharePhotoContent;
 import com.facebook.share.model.ShareVideo;
@@ -48,6 +44,7 @@ import com.facebook.share.model.ShareStoryContent;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 import androidx.annotation.Nullable;
@@ -96,6 +93,33 @@ public final class Utility {
         return map;
     }
 
+    public static WritableMap profileToReactMap(Profile profile) {
+        WritableMap map = Arguments.createMap();
+
+        String name = profile.getName();
+        Utility.putStringOrNull(map, "name", name);
+
+        String firstName = profile.getFirstName();
+        Utility.putStringOrNull(map, "firstName", firstName);
+
+        String lastName = profile.getLastName();
+        Utility.putStringOrNull(map, "lastName", lastName);
+
+        String middleName = profile.getMiddleName();
+        Utility.putStringOrNull(map, "middleName", middleName);
+
+        Uri profilePictureUri = profile.getProfilePictureUri(100, 100);
+        Utility.putStringOrNull(map, "imageURL", profilePictureUri.toString());
+
+        Uri linkUri = profile.getLinkUri();
+        Utility.putStringOrNull(map, "linkURL", linkUri.toString());
+
+        String userId = profile.getId();
+        Utility.putStringOrNull(map, "userID", userId);
+
+        return map;
+    }
+
     public static ShareContent buildShareContent(ReadableMap shareContentMap) {
         ShareContent shareContent = null;
         if (shareContentMap != null) {
@@ -108,34 +132,9 @@ public final class Utility {
                 shareContent = buildShareVideoContent(shareContentMap);
             } else if (contentType.equals("story")) {
                 shareContent = buildShareStoryContent(shareContentMap);
-            } else if (contentType.equals("open-graph")) {
-                shareContent = buildShareOpenGraphContent(shareContentMap);
             }
         }
         return shareContent;
-    }
-
-    public static AppInviteContent buildAppInviteContent(ReadableMap appInviteContentMap) {
-        AppInviteContent.Builder appInviteContentBuilder = new AppInviteContent.Builder();
-        appInviteContentBuilder.setApplinkUrl(appInviteContentMap.getString("applinkUrl"));
-        if (appInviteContentMap.hasKey("previewImageUrl")) {
-            appInviteContentBuilder.setPreviewImageUrl(appInviteContentMap.getString("previewImageUrl"));
-        }
-        String promotionText = getValueOrNull(appInviteContentMap, "promotionText");
-        String promotionCode = getValueOrNull(appInviteContentMap, "promotionCode");
-        if (promotionText != null && promotionCode != null) {
-            appInviteContentBuilder.setPromotionDetails(promotionText, promotionCode);
-        }
-        return appInviteContentBuilder.build();
-    }
-
-    public static AppGroupCreationContent buildAppGroupCreationContent(ReadableMap appGroupCreationContenMap) {
-        AppGroupCreationContent.Builder appGroupCreationContentBuilder = new AppGroupCreationContent.Builder();
-        appGroupCreationContentBuilder.setName(appGroupCreationContenMap.getString("name"));
-        appGroupCreationContentBuilder.setDescription(appGroupCreationContenMap.getString("description"));
-        appGroupCreationContentBuilder.setAppGroupPrivacy(
-                AppGroupCreationContent.AppGroupPrivacy.valueOf(appGroupCreationContenMap.getString("privacy")));
-        return appGroupCreationContentBuilder.build();
     }
 
     public static GameRequestContent buildGameRequestContent(ReadableMap gameRequestContentMap) {
@@ -143,12 +142,12 @@ public final class Utility {
         String actionType = getValueOrNull(gameRequestContentMap, "actionType");
         if (actionType != null) {
             gameRequestContentBuilder.setActionType(
-                    GameRequestContent.ActionType.valueOf(actionType.toUpperCase()));
+                    GameRequestContent.ActionType.valueOf(actionType.toUpperCase(Locale.ROOT)));
         }
         String filters = getValueOrNull(gameRequestContentMap, "filters");
         if (filters != null) {
             gameRequestContentBuilder.setFilters(
-                    GameRequestContent.Filters.valueOf(filters.toUpperCase()));
+                    GameRequestContent.Filters.valueOf(filters.toUpperCase(Locale.ROOT)));
         }
         gameRequestContentBuilder.setMessage(gameRequestContentMap.getString("message"));
         if (gameRequestContentMap.hasKey("recipients")) {
@@ -168,10 +167,6 @@ public final class Utility {
     public static ShareLinkContent buildShareLinkContent(ReadableMap shareLinkContent) {
         ShareLinkContent.Builder contentBuilder = new ShareLinkContent.Builder();
         contentBuilder.setContentUrl(Uri.parse(shareLinkContent.getString("contentUrl")));
-        String url = getValueOrNull(shareLinkContent, "imageUrl");
-        contentBuilder.setImageUrl(url != null ? Uri.parse(url) : null);
-        contentBuilder.setContentDescription(getValueOrNull(shareLinkContent, "contentDescription"));
-        contentBuilder.setContentTitle(getValueOrNull(shareLinkContent, "contentTitle"));
         contentBuilder.setQuote(getValueOrNull(shareLinkContent, "quote"));
         appendGenericContent(contentBuilder, shareLinkContent);
         return contentBuilder.build();
@@ -229,54 +224,6 @@ public final class Utility {
         String url = getValueOrNull(shareStoryContent, "contentUrl");
         contentBuilder.setAttributionLink(url);
         appendGenericContent(contentBuilder, shareStoryContent);
-        return contentBuilder.build();
-    }
-
-    public static ShareContent buildShareOpenGraphContent(ReadableMap shareContent) {
-        ShareOpenGraphContent.Builder  contentBuilder = new ShareOpenGraphContent.Builder();
-        String url = getValueOrNull(shareContent, "contentUrl");
-        contentBuilder.setContentUrl(url != null ? Uri.parse(url) : null);
-        contentBuilder.setAction(buildShareOpenGraphAction(shareContent.getMap("action")));
-        contentBuilder.setPreviewPropertyName(shareContent.getString("previewPropertyName"));
-        appendGenericContent(contentBuilder, shareContent);
-        return contentBuilder.build();
-    }
-
-    public static ShareOpenGraphAction buildShareOpenGraphAction(ReadableMap shareOpenGraphActionMap) {
-        ShareOpenGraphAction.Builder contentBuilder = new ShareOpenGraphAction.Builder();
-        contentBuilder.setActionType(shareOpenGraphActionMap.getString("actionType"));
-        ReadableMap properties = shareOpenGraphActionMap.getMap("_properties");
-        ReadableMapKeySetIterator keySetIterator = properties.keySetIterator();
-        while (keySetIterator.hasNextKey()) {
-            String key = keySetIterator.nextKey();
-            ReadableMap entry = properties.getMap(key);
-            contentBuilder.putObject(key, buildShareOpenGraphObject(entry.getMap("value")));
-        }
-        return contentBuilder.build();
-    }
-
-    public static ShareOpenGraphObject buildShareOpenGraphObject(ReadableMap entry) {
-        ShareOpenGraphObject.Builder contentBuilder = new ShareOpenGraphObject.Builder();
-        ReadableMap value = entry.getMap("_properties");
-        ReadableMapKeySetIterator keySetIterator = value.keySetIterator();
-        while (keySetIterator.hasNextKey()) {
-            String key = keySetIterator.nextKey();
-            ReadableMap subEntry = value.getMap(key);
-            switch (subEntry.getString("type")) {
-                case "number":
-                    contentBuilder.putDouble(key, subEntry.getDouble("value"));
-                    break;
-                case "open-graph-object":
-                    contentBuilder.putObject(key, buildShareOpenGraphObject(subEntry.getMap("value")));
-                    break;
-                case "photo":
-                    contentBuilder.putPhoto(key, buildSharePhoto(subEntry.getMap("value")));
-                    break;
-                case "string":
-                    contentBuilder.putString(key, subEntry.getString("value"));
-                    break;
-            }
-        }
         return contentBuilder.build();
     }
 
@@ -346,5 +293,13 @@ public final class Utility {
             array[i++] = e;
         }
         return array;
+    }
+
+    private static void putStringOrNull(WritableMap map, String key, String value) {
+        if (value == null) {
+            map.putNull(key);
+        } else {
+            map.putString(key, value);
+        }
     }
 }

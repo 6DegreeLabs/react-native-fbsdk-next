@@ -1,10 +1,10 @@
 {
   "name": "react-native-fbsdk-next",
-  "version": "4.1.0",
+  "version": "10.0.0",
   "description": "Facebook SDK support for React Native apps.",
   "main": "lib/commonjs/index.js",
   "module": "lib/module/index.js",
-  "react-native": "src/index.js",
+  "types": "lib/typescript/src/index.d.ts",
   "sideEffects": false,
   "author": {
     "name": "Marcos Bérgamo"
@@ -27,6 +27,9 @@
     },
     {
       "name": "Georges DIMITRY"
+    },
+    {
+      "name": "Mike Hardy"
     }
   ],
   "repository": {
@@ -45,17 +48,24 @@
   ],
   "license": "MIT",
   "scripts": {
+    "build:plugin": "tsc --build plugin",
+    "clean:plugin": "expo-module clean plugin",
+    "lint:plugin": "eslint plugin/src/*",
     "start": "react-native start",
-    "prepare": "bob build",
-    "flow": "flow",
+    "prepare": "bob build && npm run clean:plugin && npm run build:plugin",
     "lint": "eslint ./src",
-    "test": "yarn validate:prettier && yarn validate:eslint && yarn validate:flow",
-    "validate:eslint": "eslint \"src/**/*\" \"example/src/**/*\"",
-    "validate:flow": "flow",
-    "validate:prettier": "prettier \"src/**/*.js\" \"example/src/**/*.js\" --check",
-    "example:ios": "cd ./example && react-native run-ios",
-    "example:android": "cd ./example && react-native run-android --no-jetifier",
-    "semantic-release": "semantic-release"
+    "test": "yarn validate:prettier && yarn validate:eslint && yarn jest",
+    "validate:eslint": "eslint \"src/**/*\"",
+    "validate:prettier": "prettier \"{src,jest,plugin/src}/**/*.{js,ts,tsx}\" --check",
+    "validate:ts": "tsc --noEmit",
+    "example:start": "cd ./RNFBSDKExample && yarn start",
+    "example:ios": "cd ./RNFBSDKExample/ios && rm -f Podfile.lock && pod install && yarn ios",
+    "example:android": "cd ./RNFBSDKExample && yarn android --no-jetifier",
+    "example:clean": "cd RNFBSDKExample && \\rm -fr yarn.lock node_modules ios/Podfile.lock && cd ..",
+    "example:install": "cd RNFBSDKExample && yarn && cd ios && (rm -f Podfile.lock && pod install || true) && cd ../..",
+    "example:devcopy": "yarn prepare && cp -rv package.json android ios lib src *.podspec RNFBSDKExample/node_modules/react-native-fbsdk-next/",
+    "semantic-release": "semantic-release",
+    "jest": "jest"
   },
   "files": [
     "android/src/main/AndroidManifest.xml",
@@ -67,54 +77,79 @@
     "LICENSE.txt",
     "README.md",
     "react-native-fbsdk-next.podspec",
-    "types"
+    "jest",
+    "tsconfig.json",
+    "app.plugin.js",
+    "expo-module.config.json",
+    "plugin/build/"
   ],
-  "dependencies": {},
+  "dependencies": {
+    "@expo/config-plugins": "^4.1.5",
+    "xml2js": "^0.4.23"
+  },
   "peerDependencies": {
-    "react-native": ">=0.59.0"
+    "react-native": ">=0.63.3"
   },
   "devDependencies": {
-    "@babel/core": "^7.12.7",
-    "@babel/runtime": "^7.12.5",
-    "@react-native-community/bob": "^0.16.2",
-    "@react-native-community/eslint-config": "^2.0.0",
-    "@semantic-release/commit-analyzer": "^8.0.1",
-    "@semantic-release/git": "^9.0.0",
-    "@semantic-release/github": "^7.2.0",
-    "@semantic-release/npm": "^7.0.10",
-    "@semantic-release/release-notes-generator": "^9.0.2",
-    "babel-jest": "^26.6.3",
+    "@babel/core": "^7.18.2",
+    "@babel/runtime": "^7.18.3",
+    "@react-native-community/eslint-config": "^3.0.2",
+    "@semantic-release/commit-analyzer": "^9.0.2",
+    "@semantic-release/git": "^10.0.1",
+    "@semantic-release/github": "^8.0.4",
+    "@semantic-release/npm": "^9.0.1",
+    "@semantic-release/release-notes-generator": "^10.0.3",
+    "@trivago/prettier-plugin-sort-imports": "^3.2.0",
+    "@types/react": "^18.0.10",
+    "@types/react-native": "^0.67.7",
+    "@types/xml2js": "^0.4.11",
+    "@typescript-eslint/eslint-plugin": "^5.27.0",
+    "@typescript-eslint/parser": "^5.27.0",
+    "babel-jest": "^28.1.0",
     "babel-plugin-module-resolver": "^4.0.0",
-    "eslint": "7.14.0",
-    "flow-bin": "^0.122.0",
-    "jest": "^26.6.3",
-    "metro-react-native-babel-preset": "^0.59.0",
-    "prettier": "^2.2.0",
-    "react": "16.13.1",
-    "react-native": "^0.63.3",
-    "react-test-renderer": "16.13.1",
-    "semantic-release": "^17.4.1"
+    "conventional-changelog-conventionalcommits": "^5.0.0",
+    "eslint": "^8.16.0",
+    "expo-module-scripts": "^2.0.0",
+    "jest": "^28.1.0",
+    "metro-react-native-babel-preset": "^0.71.0",
+    "prettier": "^2.6.2",
+    "react": "18.1.0",
+    "react-native": "^0.68.2",
+    "react-native-builder-bob": "^0.18.2",
+    "react-test-renderer": "18.1.0",
+    "semantic-release": "^19.0.2",
+    "typescript": "^4.7.2"
   },
   "prettier": {
-    "requirePragma": true,
     "singleQuote": true,
     "trailingComma": "all",
     "bracketSpacing": false,
-    "jsxBracketSameLine": true,
-    "parser": "flow"
+    "bracketSameLine": true,
+    "parser": "typescript"
   },
   "@react-native-community/bob": {
     "source": "src",
     "output": "lib",
     "targets": [
       [
-        "commonjs",
-        {
-          "copyFlow": true
-        }
+        "commonjs"
       ],
-      "module"
+      "module",
+      "typescript"
     ]
   },
-  "types": "types/index.d.ts"
+  "react-native": "src/index.ts",
+  "react-native-builder-bob": {
+    "source": "src",
+    "output": "lib",
+    "targets": [
+      "commonjs",
+      "module",
+      "typescript"
+    ]
+  },
+  "eslintIgnore": [
+    "node_modules/",
+    "lib/"
+  ]
 }

@@ -63,18 +63,51 @@ RCT_REMAP_METHOD(getDefaultAudience, getDefaultAudience_resolver:(RCTPromiseReso
 }
 
 RCT_EXPORT_METHOD(logInWithPermissions:(NSArray<NSString *> *)permissions
+                  loginTracking: (NSString *)loginTracking
+                  nonce: (NSString *)nonce
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 {
-  FBSDKLoginManagerLoginResultBlock requestHandler = ^(FBSDKLoginManagerLoginResult *result, NSError *error) {
-    if (error) {
-      reject(@"FacebookSDK", @"Login Failed", error);
-    } else {
-      resolve(RCTBuildResultDictionary(result));
-    }
-  };
+    FBSDKLoginManagerLoginResultBlock requestHandler = ^(FBSDKLoginManagerLoginResult *result, NSError *error) {
+        if (error) {
+            reject(@"FacebookSDK", @"Login Failed", error);
+        } else {
+            resolve(RCTBuildResultDictionary(result));
+        }
+    };
+    FBSDKLoginConfiguration *configuration;
+    FBSDKLoginTracking tracking = [loginTracking  isEqualToString: @"limited"] ? FBSDKLoginTrackingLimited : FBSDKLoginTrackingEnabled;
 
-  [_loginManager logInWithPermissions:permissions fromViewController:nil handler:requestHandler];
+    if ( ( ![nonce isEqual:[NSNull null]] ) && ( [nonce length] != 0 ) ) {
+        configuration =
+        [[FBSDKLoginConfiguration alloc] initWithPermissions:permissions
+                                                    tracking: tracking
+                                                       nonce:nonce
+         ];
+    } else {
+        configuration =
+        [[FBSDKLoginConfiguration alloc] initWithPermissions:permissions
+                                                    tracking: tracking
+         ];
+    }
+
+    [_loginManager
+     logInFromViewController: nil
+     configuration:configuration
+     completion:requestHandler];
+};
+
+RCT_EXPORT_METHOD(reauthorizeDataAccess:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
+{
+    FBSDKLoginManagerLoginResultBlock requestHandler = ^(FBSDKLoginManagerLoginResult *result, NSError *error) {
+      if (error) {
+        reject(@"FacebookSDK", @"Reauthorization Failed", error);
+      } else {
+        resolve(RCTBuildResultDictionary(result));
+      }
+    };
+
+    [_loginManager reauthorizeDataAccess:nil handler:requestHandler];
 };
 
 RCT_EXPORT_METHOD(logOut)
