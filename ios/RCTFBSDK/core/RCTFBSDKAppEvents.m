@@ -21,7 +21,6 @@
 #import <React/RCTUtils.h>
 
 #import "RCTConvert+FBSDKAccessToken.h"
-#import "FBSDKCoreKit/FBSDKAppEventsUtility.h"
 
 @implementation RCTConvert (RCTFBSDKAppEvents)
 
@@ -29,6 +28,20 @@ RCT_ENUM_CONVERTER(FBSDKAppEventsFlushBehavior, (@{
   @"auto": @(FBSDKAppEventsFlushBehaviorAuto),
   @"explicit_only": @(FBSDKAppEventsFlushBehaviorExplicitOnly),
 }), FBSDKAppEventsFlushBehaviorAuto, unsignedIntegerValue)
+
+RCT_ENUM_CONVERTER(FBSDKProductAvailability, (@{
+  @"in_stock": @(FBSDKProductAvailabilityInStock),
+  @"out_of_stock": @(FBSDKProductAvailabilityOutOfStock),
+  @"preorder": @(FBSDKProductAvailabilityPreOrder),
+  @"avaliable_for_order": @(FBSDKProductAvailabilityAvailableForOrder),
+  @"discontinued": @(FBSDKProductAvailabilityDiscontinued),
+}), FBSDKProductAvailabilityInStock, unsignedIntegerValue)
+
+RCT_ENUM_CONVERTER(FBSDKProductCondition, (@{
+  @"new": @(FBSDKProductConditionNew),
+  @"refurbished": @(FBSDKProductConditionRefurbished),
+  @"used": @(FBSDKProductConditionUsed),
+}), FBSDKProductConditionNew, unsignedIntegerValue)
 
 @end
 
@@ -49,10 +62,10 @@ RCT_EXPORT_METHOD(logEvent:(NSString *)eventName
 {
   parameters = RCTDictionaryWithoutNullValues(parameters);
 
-  [FBSDKAppEvents logEvent:eventName
-                valueToSum:valueToSum
-                parameters:parameters
-               accessToken:nil];
+  [FBSDKAppEvents.shared logEvent:eventName
+                       valueToSum:valueToSum
+                       parameters:parameters
+                      accessToken:nil];
 }
 
 RCT_EXPORT_METHOD(logPurchase:(double)purchaseAmount
@@ -61,32 +74,66 @@ RCT_EXPORT_METHOD(logPurchase:(double)purchaseAmount
 {
   parameters = RCTDictionaryWithoutNullValues(parameters);
 
-  [FBSDKAppEvents logPurchase:purchaseAmount
-                     currency:currency
-                   parameters:parameters
-                  accessToken:nil];
+  [FBSDKAppEvents.shared logPurchase:purchaseAmount
+                            currency:currency
+                          parameters:parameters
+                         accessToken:nil];
+}
+
+RCT_EXPORT_METHOD(logProductItem:(NSString *)itemID
+                    availability:(FBSDKProductAvailability)availability
+                       condition:(FBSDKProductCondition)condition
+                     description:(NSString *)description
+                       imageLink:(NSString *)imageLink
+                            link:(NSString *)link
+                           title:(NSString *)title
+                     priceAmount:(double)priceAmount
+                        currency:(NSString *)currency
+                            gtin:(NSString *)gtin
+                             mpn:(NSString *)mpn
+                           brand:(NSString *)brand
+                      parameters:(NSDictionary *)parameters)
+{
+    [FBSDKAppEvents.shared logProductItem:itemID
+                             availability:availability
+                                condition:condition
+                              description:description
+                                imageLink:imageLink
+                                     link:link
+                                    title:title
+                              priceAmount:priceAmount
+                                 currency:currency
+                                     gtin:gtin
+                                      mpn:mpn
+                                    brand:brand
+                               parameters:parameters];
 }
 
 RCT_EXPORT_METHOD(logPushNotificationOpen:(NSDictionary *)payload)
 {
-  [FBSDKAppEvents logPushNotificationOpen:payload];
+  [FBSDKAppEvents.shared logPushNotificationOpen:payload];
 }
 
 RCT_EXPORT_METHOD(setUserID:(NSString *)userID)
 {
-  [FBSDKAppEvents setUserID:userID];
+  [FBSDKAppEvents.shared setUserID:userID];
+}
+
+RCT_EXPORT_METHOD(clearUserID)
+{
+  [FBSDKAppEvents.shared setUserID:nil];
 }
 
 RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(getUserID)
 {
-  return [FBSDKAppEvents userID];
+  return [FBSDKAppEvents.shared userID];
 }
 
 RCT_EXPORT_METHOD(getAnonymousID:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 {
   @try {
-    NSString *anonymousID = [FBSDKAppEvents anonymousID];
+    NSString *anonymousID = [FBSDKAppEvents.shared anonymousID];
     resolve(anonymousID);
   }
   @catch (NSError *error) {
@@ -98,50 +145,43 @@ RCT_EXPORT_METHOD(getAdvertiserID:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 {
   @try {
-    NSString *advertiserID = [FBSDKAppEventsUtility advertiserID];
-    resolve(advertiserID);
+    // advertiserID is no longer available to iOS from FBSDK v12
+    resolve(nil);
   }
   @catch (NSError *error) {
     reject(@"E_ADVERTISER_ID_ERROR", @"Can not get advertiserID", error);
   }
 }
 
-RCT_EXPORT_METHOD(updateUserProperties:(NSDictionary *)parameters)
-{
-  parameters = RCTDictionaryWithoutNullValues(parameters);
-
-  [FBSDKAppEvents updateUserProperties:parameters handler:nil];
-}
-
 RCT_EXPORT_METHOD(setUserData:(NSDictionary *)userData)
 {
   userData = RCTDictionaryWithoutNullValues(userData);
 
-  [FBSDKAppEvents setUserEmail:userData[@"email"]
-                     firstName:userData[@"firstName"]
-                      lastName:userData[@"lastName"]
-                         phone:userData[@"phone"]
-                   dateOfBirth:userData[@"dateOfBirth"]
-                        gender:userData[@"gender"]
-                          city:userData[@"city"]
-                         state:userData[@"state"]
-                           zip:userData[@"zip"]
-                       country:userData[@"country"]];
+  [FBSDKAppEvents.shared setUserEmail:userData[@"email"]
+                            firstName:userData[@"firstName"]
+                             lastName:userData[@"lastName"]
+                                phone:userData[@"phone"]
+                          dateOfBirth:userData[@"dateOfBirth"]
+                               gender:userData[@"gender"]
+                                 city:userData[@"city"]
+                                state:userData[@"state"]
+                                  zip:userData[@"zip"]
+                              country:userData[@"country"]];
 }
 
 RCT_EXPORT_METHOD(setFlushBehavior:(FBSDKAppEventsFlushBehavior)flushBehavior)
 {
-  [FBSDKAppEvents setFlushBehavior:flushBehavior];
+  [FBSDKAppEvents.shared setFlushBehavior:flushBehavior];
 }
 
 RCT_EXPORT_METHOD(flush)
 {
-  [FBSDKAppEvents flush];
+  [FBSDKAppEvents.shared flush];
 }
 
 RCT_EXPORT_METHOD(setPushNotificationsDeviceToken:(NSString *)deviceToken)
 {
-  [FBSDKAppEvents setPushNotificationsDeviceToken:[RCTConvert NSData:deviceToken]];
+  [FBSDKAppEvents.shared setPushNotificationsDeviceToken:[RCTConvert NSData:deviceToken]];
 }
 
 - (NSDictionary *)constantsToExport {

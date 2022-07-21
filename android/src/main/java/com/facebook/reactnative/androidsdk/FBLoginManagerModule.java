@@ -37,6 +37,7 @@ import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.module.annotations.ReactModule;
 
+import java.util.Locale;
 import java.util.Set;
 
 /**
@@ -85,7 +86,7 @@ public class FBLoginManagerModule extends FBSDKCallbackManagerBaseJavaModule {
      */
     @ReactMethod
     public void getLoginBehavior(Promise promise) {
-        promise.resolve(LoginManager.getInstance().getLoginBehavior().name().toLowerCase());
+        promise.resolve(LoginManager.getInstance().getLoginBehavior().name().toLowerCase(Locale.ROOT));
     }
 
     /**
@@ -96,7 +97,7 @@ public class FBLoginManagerModule extends FBSDKCallbackManagerBaseJavaModule {
      */
     @ReactMethod
     public void setLoginBehavior(String loginBehaviorString) {
-        LoginBehavior loginBehavior = LoginBehavior.valueOf(loginBehaviorString.toUpperCase());
+        LoginBehavior loginBehavior = LoginBehavior.valueOf(loginBehaviorString.toUpperCase(Locale.ROOT));
         LoginManager.getInstance().setLoginBehavior(loginBehavior);
     }
 
@@ -106,7 +107,7 @@ public class FBLoginManagerModule extends FBSDKCallbackManagerBaseJavaModule {
      */
     @ReactMethod
     public void getDefaultAudience(Promise promise) {
-        promise.resolve(LoginManager.getInstance().getDefaultAudience().name().toLowerCase());
+        promise.resolve(LoginManager.getInstance().getDefaultAudience().name().toLowerCase(Locale.ROOT));
     }
 
     /**
@@ -116,7 +117,7 @@ public class FBLoginManagerModule extends FBSDKCallbackManagerBaseJavaModule {
      */
     @ReactMethod
     public void setDefaultAudience(String defaultAudienceString) {
-        DefaultAudience defaultAudience = DefaultAudience.valueOf(defaultAudienceString.toUpperCase());
+        DefaultAudience defaultAudience = DefaultAudience.valueOf(defaultAudienceString.toUpperCase(Locale.ROOT));
         LoginManager.getInstance().setDefaultAudience(defaultAudience);
     }
 
@@ -143,6 +144,20 @@ public class FBLoginManagerModule extends FBSDKCallbackManagerBaseJavaModule {
         if (activity != null) {
             loginManager.logIn(activity,
                     Utility.reactArrayToStringList(permissions));
+        }
+    }
+
+    /**
+     * Attempts a re-authorization to regain data access.
+     * @param promise Use promise to pass re-authorization result to JS after re-authorization finish.
+     */
+    @ReactMethod
+    public void reauthorizeDataAccess(final Promise promise) {
+        final LoginManager loginManager = LoginManager.getInstance();
+        loginManager.registerCallback(getCallbackManager(), new LoginManagerCallback(promise));
+        Activity activity = getCurrentActivity();
+        if (activity != null) {
+            loginManager.reauthorizeDataAccess(activity);
         }
     }
 

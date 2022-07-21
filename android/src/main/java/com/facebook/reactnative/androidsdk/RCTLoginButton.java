@@ -20,8 +20,6 @@
 
 package com.facebook.reactnative.androidsdk;
 
-import android.content.Intent;
-
 import com.facebook.AccessToken;
 import com.facebook.AccessTokenTracker;
 import com.facebook.CallbackManager;
@@ -43,8 +41,7 @@ import java.util.Set;
  */
 public class RCTLoginButton extends LoginButton {
 
-    private CallbackManager mCallbackManager;
-    private AccessTokenTracker mAccessTokenTracker;
+    private final CallbackManager mCallbackManager;
 
     public RCTLoginButton(ThemedReactContext context, CallbackManager callbackManager) {
         super(context);
@@ -54,7 +51,7 @@ public class RCTLoginButton extends LoginButton {
     }
 
     public void init() {
-        mAccessTokenTracker = new AccessTokenTracker() {
+        new AccessTokenTracker() {
             @Override
             protected void onCurrentAccessTokenChanged(
                     AccessToken oldAccessToken,
