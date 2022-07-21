@@ -22,7 +22,7 @@
  */
 'use strict';
 
-import type {ShareContentCommonParameters} from './FBShareContent';
+import {ShareContentCommonParameters} from './FBShareContent';
 
 /**
  * A model for photo content to be shared.
