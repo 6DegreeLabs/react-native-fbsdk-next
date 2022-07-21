@@ -21,14 +21,14 @@
  */
 import {ShareLinkContent} from './FBShareLinkContent';
 import {SharePhotoContent} from './FBSharePhotoContent';
-import {ShareVideoContent} from './FBShareVideoContent';
 import {ShareStoryContent} from './FBShareStoryContent';
+import {ShareVideoContent} from './FBShareVideoContent';
 
 export type ShareContent =
   | ShareLinkContent
   | SharePhotoContent
-  | ShareVideoContent
-  | ShareStoryContent;
+  | ShareStoryContent
+  | ShareVideoContent;
 /**
  * A base interface for content to be shared.
  */

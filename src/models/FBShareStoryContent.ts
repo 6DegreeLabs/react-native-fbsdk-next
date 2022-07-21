@@ -17,11 +17,8 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
- * @flow
  * @format
  */
-'use strict';
-
 import {ShareContentCommonParameters} from './FBShareContent';
 
 /**
@@ -31,17 +28,17 @@ export type ShareStoryContent = {
   /**
    * The type of content to be shared is photo.
    */
-  contentType: 'story',
+  contentType: 'story';
 
   /**
    * Common parameters for share content;
    */
-  commonParameters?: ShareContentCommonParameters,
+  commonParameters?: ShareContentCommonParameters;
 
   /**
    * URL for the content being shared.
    */
-  contentUrl?: string,
+  contentUrl?: string;
 
   /**
    * Uri to an image (JPG, PNG) or video (H.264, H.265, WebM). Recommended
@@ -49,14 +46,14 @@ export type ShareStoryContent = {
    * up to 20 seconds in duration. The Uri needs to be a content Uri to a local
    * file on device.
    */
-  backgroundUrl?: string,
+  backgroundUrl?: string;
 
   /**
    * Uri to an image (JPG, PNG). Recommended dimensions: 640x480. This image
    * will be placed as a sticker over the background. The Uri needs to be a
    * content Uri to a local file on device.
    */
-  stickerUrl?: string,
+  stickerUrl?: string;
 
   /**
    * A list of hex string color values used to generate a gradient from top to
@@ -64,5 +61,5 @@ export type ShareStoryContent = {
    * are passing a background asset, the asset will be used and the color list
    * will be ignored.
    */
-  backgroundColors?: Array<String>,
+  backgroundColors?: Array<String>;
 };
