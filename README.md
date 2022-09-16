@@ -133,6 +133,18 @@ Follow ***steps 2, 3 and 4*** in the [Getting Started Guide](https://developers.
       ```
    3. After this step, if you run into this `build` issue: `Undefined symbols for architecture x86_64:`, 
    then you need to create a new file `File.swift` on your project folder. After doing this, you will get a prompt from `Xcode` asking if you would like to create a `Bridging Header`. Click accept.
+   4. From the facebook-ios-sdk docs steps 1-3, but in Objective-C since they have moved to Swift for their examples - make something like the following code is in AppDelegate.m:
+      ```objc
+      - (BOOL)application:(UIApplication *)app
+                  openURL:(NSURL *)url
+                  options:(NSDictionary<UIApplicationOpenURLOptionsKey,id> *)options
+      {
+        return [[FBSDKApplicationDelegate sharedInstance]application:app
+                                                            openURL:url
+                                                            options:options];
+      }
+      ```
+      Without this code login might not work if Facebook app is installed, see https://github.com/thebergamo/react-native-fbsdk-next/issues/59#issuecomment-1038149447 - if you are also using react-native deep-linking you may need have multiple entries in this openURL method, as detailed in the next section
 
 **If you're not using cocoapods already** you can also follow step 1.1 to set it up.
 
@@ -725,6 +737,8 @@ The plugin provides props for extra customization. Every time you change the pro
 - `advertiserIDCollectionEnabled` (_boolean_): Enable advertiser ID collection. Default `false`.
 - `autoLogAppEventsEnabled` (_boolean_): Default `false`.
 - `isAutoInitEnabled` (_boolean_): Default `false`.
+         
+> If you are migrating from `expo-facebook` to this library, it is important to consider that `clientToken` was not required in `expo-facebook`, but it is required here. You can get that value from "Facebook Developers > Your App > Configurations > Advanced".
 
 #### Example
 
@@ -746,6 +760,23 @@ The plugin provides props for extra customization. Every time you change the pro
       ]
     ]
   }
+}
+```
+
+## Enabling Auto App Installs in Expo
+To enable auto app installs in Expo, you need to set autoLogAppEventsEnabled and advertiserIDCollectionEnabled flags to **true** in your `app.json` or `app.config.js`.
+
+Moreover, on iOS you need user consent to collect user data. You can do this by adding the following code somewhere to your `App.tsx`:
+
+```js
+import { requestTrackingPermissionsAsync } from 'expo-tracking-transparency';
+
+const { status } = await requestTrackingPermissionsAsync(); 
+
+Settings.initializeSDK();
+
+if (status === 'granted') {
+    await Settings.setAdvertiserTrackingEnabled(true);
 }
 ```
 
