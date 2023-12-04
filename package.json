@@ -1,6 +1,6 @@
 {
   "name": "react-native-fbsdk-next",
-  "version": "10.1.0",
+  "version": "12.1.2",
   "description": "Facebook SDK support for React Native apps.",
   "main": "lib/commonjs/index.js",
   "module": "lib/module/index.js",
@@ -60,7 +60,7 @@
     "validate:ts": "tsc --noEmit",
     "example:start": "cd ./RNFBSDKExample && yarn start",
     "example:ios": "cd ./RNFBSDKExample/ios && rm -f Podfile.lock && pod install && yarn ios",
-    "example:android": "cd ./RNFBSDKExample && yarn android --no-jetifier",
+    "example:android": "cd ./RNFBSDKExample && yarn android",
     "example:clean": "cd RNFBSDKExample && \\rm -fr yarn.lock node_modules ios/Podfile.lock && cd ..",
     "example:install": "cd RNFBSDKExample && yarn && cd ios && (rm -f Podfile.lock && pod install || true) && cd ../..",
     "example:devcopy": "yarn prepare && cp -rv package.json android ios lib src *.podspec RNFBSDKExample/node_modules/react-native-fbsdk-next/",
@@ -83,12 +83,15 @@
     "expo-module.config.json",
     "plugin/build/"
   ],
-  "dependencies": {
-    "@expo/config-plugins": "^4.1.5",
-    "xml2js": "^0.4.23"
-  },
+  "dependencies": {},
   "peerDependencies": {
+    "expo": ">=47.0.0",
     "react-native": ">=0.63.3"
+  },
+  "peerDependenciesMeta": {
+    "expo": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@babel/core": "^7.18.2",
@@ -102,13 +105,14 @@
     "@trivago/prettier-plugin-sort-imports": "^3.2.0",
     "@types/react": "^18.0.10",
     "@types/react-native": "^0.67.7",
-    "@types/xml2js": "^0.4.11",
+    "@types/xml2js": "^0.4.13",
     "@typescript-eslint/eslint-plugin": "^5.27.0",
     "@typescript-eslint/parser": "^5.27.0",
     "babel-jest": "^28.1.0",
     "babel-plugin-module-resolver": "^4.0.0",
     "conventional-changelog-conventionalcommits": "^5.0.0",
     "eslint": "^8.16.0",
+    "expo": "^47.0.0",
     "expo-module-scripts": "^2.0.0",
     "jest": "^28.1.0",
     "metro-react-native-babel-preset": "^0.71.0",
@@ -118,7 +122,8 @@
     "react-native-builder-bob": "^0.18.2",
     "react-test-renderer": "18.1.0",
     "semantic-release": "^19.0.2",
-    "typescript": "^4.7.2"
+    "typescript": "^4.7.2",
+    "xml2js": "^0.6.2"
   },
   "prettier": {
     "singleQuote": true,

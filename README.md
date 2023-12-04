@@ -117,7 +117,7 @@ protected List<ReactPackage> getPackages() {
 
 #### 3.1 Android
 
-Before you can run the project, follow the [Getting Started Guide](https://developers.facebook.com/docs/android/getting-started/) for Facebook Android SDK to set up a Facebook app. You can skip the build.gradle changes since that's taken care of by the rnpm link step above, but **make sure** you follow the rest of the steps such as updating `strings.xml` and `AndroidManifest.xml`.
+Before you can run the project, follow the [Getting Started Guide](https://developers.facebook.com/docs/android/getting-started/) for Facebook Android SDK to set up a Facebook app. You can skip the build.gradle changes since that's taken care of by the rnpm link step above, but **make sure** you follow the rest of the steps such as updating `strings.xml` and `AndroidManifest.xml`. In addition, keep in mind that you have to point the Key Hash generation command at your app's `debug.keystore` file. You can find its location by checking [`storeFile`](https://developer.android.com/studio/build/gradle-tips#sign-your-app) in one of the `build.gradle` files (its default path is `android/app/build.gradle` however this can vary from project to project).
 
 #### 3.2 iOS
 
@@ -125,7 +125,12 @@ Follow ***steps 2, 3 and 4*** in the [Getting Started Guide](https://developers.
 
 **NOTE:** The above link (Step 3 and 4) contains Swift code instead of Objective-C which is inconvenient since `react-native` ecosystem still relies
    on Objective-C. To make it work in Objective-C you need to do the following in `/ios/PROJECT/AppDelegate.m`:
-   1. Add `#import <FBSDKCoreKit/FBSDKCoreKit.h>`
+   1. Add
+   ```objc
+   #import <AuthenticationServices/AuthenticationServices.h>
+   #import <SafariServices/SafariServices.h>
+   #import <FBSDKCoreKit/FBSDKCoreKit-Swift.h>
+   ```
    2. Inside `didFinishLaunchingWithOptions`, add the following:
       ```objc
          [[FBSDKApplicationDelegate sharedInstance] application:application
@@ -153,7 +158,9 @@ Follow ***steps 2, 3 and 4*** in the [Getting Started Guide](https://developers.
 The `AppDelegate.m` file can only have one method for `openUrl`. If you're also using `RCTLinkingManager` to handle deep links, you should handle both results in your `openUrl` method.
 
 ```objc
-#import <FBSDKCoreKit/FBSDKCoreKit.h> // <- Add This Import
+#import <AuthenticationServices/AuthenticationServices.h> // <- Add This Import
+#import <SafariServices/SafariServices.h> // <- Add This Import
+#import <FBSDKCoreKit/FBSDKCoreKit-Swift.h> // <- Add This Import
 #import <React/RCTLinkingManager.h> // <- Add This Import
 
 - (BOOL)application:(UIApplication *)app
@@ -295,7 +302,9 @@ Settings.initializeSDK();
 If you would like to initialize the Facebook SDK even earlier in startup for iOS, you need to include this code in your AppDelegate.m file now that auto-initialization is removed.
 
 ```objective-c
-#import <FBSDKCoreKit/FBSDKCoreKit.h> // <- Add This Import
+#import <AuthenticationServices/AuthenticationServices.h> // <- Add This Import
+#import <SafariServices/SafariServices.h> // <- Add This Import
+#import <FBSDKCoreKit/FBSDKCoreKit-Swift.h> // <- Add This Import
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
@@ -643,13 +652,13 @@ Add the following code in the system `application:openURL:options:` function fro
 The DeepLink URL from the re-engagement ads should be passed to the AEM Kit even if the app is opened in cold start.
 
 ```objc
-#import <FBAEMKit/FBAEMKit.h>
+#import <FBAEMKit/FBAEMKit-Swift.h>
 
 // apply codes below to `application:openURL:options:` 
 // in `AppDelegate.m` or `SceneDelegate.m`
-[FBAEMReporter configureWithNetworker:nil appID:{app-id}];
+[FBAEMReporter configureWithNetworker:nil appID:@"{app-id}" reporter:nil]; // Replace {app-id} with your Facebook App id
 [FBAEMReporter enable];
-[FBAEMReporter handleURL:url];
+[FBAEMReporter handle:url];
 ```
 
 #### **Step 2. Add AEM Logging**
@@ -724,16 +733,24 @@ After installing this npm package, add the [config plugin](https://docs.expo.io/
 }
 ```
 
+Unless you are managing your own native code, the config plugin must be configured per the following "API" section.
+         
 Next, rebuild your app as described in the ["Adding custom native code"](https://docs.expo.io/workflow/customizing/) guide.
 
 ### API
 
 The plugin provides props for extra customization. Every time you change the props or plugins, you'll need to rebuild (and `prebuild`) the native app. If no extra properties are added, defaults will be used.
 
+Required configuration:
+         
 - `appID` (_string_): Facebook Application ID.
 - `displayName` (_string_): Application Name.
 - `clientToken` (_string_): Client Token.
-- `iosUserTrackingPermission` (_string_): iOS User Tracking Permission.
+- `scheme` (_string_): The scheme to use for returning to the app from Facebook. Of the form `fb[app-id]`.
+
+Optional configuration:
+
+- `iosUserTrackingPermission` (_string_ || false): iOS User Tracking Permission.
 - `advertiserIDCollectionEnabled` (_boolean_): Enable advertiser ID collection. Default `false`.
 - `autoLogAppEventsEnabled` (_boolean_): Default `false`.
 - `isAutoInitEnabled` (_boolean_): Default `false`.
@@ -752,6 +769,7 @@ The plugin provides props for extra customization. Every time you change the pro
           "appID": "48127127xxxxxxxx",
           "clientToken": "c5078631e4065b60d7544a95xxxxxxxx",
           "displayName": "RN SDK Demo",
+          "scheme": "fb48127127xxxxxxxx",
           "advertiserIDCollectionEnabled": false,
           "autoLogAppEventsEnabled": false,
           "isAutoInitEnabled": true,
@@ -779,6 +797,31 @@ if (status === 'granted') {
     await Settings.setAdvertiserTrackingEnabled(true);
 }
 ```
+
+## Migrating from expo-facebook to react-native-fbsdk-next
+The [expo-facebook](https://github.com/expo/expo-facebook) module was deprecated in Expo SDK 45 and removed in Expo SDK 46. The following feature parity table lists the `expo-facebook` API functions and their `react-native-fbsdk-native` counterparts, where available:
+
+| expo-facebook | Supported | react-native-fbsdk-next |
+| --- | --- | --- |
+| [flushAsync()](https://docs.expo.dev/versions/v45.0.0/sdk/facebook/#flushasync) | ✅ | AppEventsLogger.flush() |
+| [getAdvertiserIDAsync()](https://docs.expo.dev/versions/v45.0.0/sdk/facebook/#getadvertiseridasync) | ❌ | Not supported |
+| [getAnonymousIDAsync()](https://docs.expo.dev/versions/v45.0.0/sdk/facebook/#getanonymousidasync) | ✅ | AppEventsLogger.getAnonymousID() |
+| [getAttributionIDAsync()](https://docs.expo.dev/versions/v45.0.0/sdk/facebook/#getattributionidasync) | ✅ | AppEventsLogger.getAttributionID() |
+| [getAuthenticationCredentialAsync()](https://docs.expo.dev/versions/v45.0.0/sdk/facebook/#getauthenticationcredentialasync) | ✅ | AccessToken.accessToken |
+| [getPermissionsAsync()](https://docs.expo.dev/versions/v45.0.0/sdk/facebook/#getpermissionsasync) | ❌ | Not supported |
+| [getUserIDAsync()](https://docs.expo.dev/versions/v45.0.0/sdk/facebook/#getuseridasync) | ✅ | AppEventsLogger.getUserId() |
+| [initializeAsync(optionsOrAppId, appName)](https://docs.expo.dev/versions/v45.0.0/sdk/facebook/#initializeasyncoptionsorappid-appname) | ✅ | Settings.setAppID($appId); Settings.setAppName($appName); Settings.setGraphAPIVersion($version); Settings.setAutoLogAppEventsEnabled($autoLogAppEvents); <br/> Settings.initializeSDK() |
+| [logEventAsync(eventName, parameters)](https://docs.expo.dev/versions/v45.0.0/sdk/facebook/#logeventasynceventname-parameters) | ✅ | AppEventsLogger.logEvent(eventName, parameters) |
+| [logInWithReadPermissionsAsync(options)](https://docs.expo.dev/versions/v45.0.0/sdk/facebook/#loginwithreadpermissionsasyncoptions) | ✅ | LoginManager.logInWithPermissions(permissions) |
+| [logOutAsync()](https://docs.expo.dev/versions/v45.0.0/sdk/facebook/#logoutasync)  | ✅ | LoginManager.logOut() |
+| [logPurchaseAsync(purchaseAmount, currencyCode, parameters)](https://docs.expo.dev/versions/v45.0.0/sdk/facebook/#logpurchaseasyncpurchaseamount-currencycode-parameters) | ✅ | AppEventsLogger.logPurchase(purchaseAmount, currency, parameters) |
+| [logPushNotificationOpenAsync(campaign)](https://docs.expo.dev/versions/v45.0.0/sdk/facebook/#logpushnotificationopenasynccampaign) | ✅ | AppEventsLogger.logPushNotificationOpen(payload) |
+| [requestPermissionsAsync()](https://docs.expo.dev/versions/v45.0.0/sdk/facebook/#requestpermissionsasync) | ❌ | Not supported |
+| [setAdvertiserIDCollectionEnabledAsync(enabled)](https://docs.expo.dev/versions/v45.0.0/sdk/facebook/#setadvertiseridcollectionenabledasyncenabled) | ✅ | Settings.setAdvertiserIDCollectionEnabled(enabled) |
+| [setAdvertiserTrackingEnabledAsync(enabled)](https://docs.expo.dev/versions/v45.0.0/sdk/facebook/#setadvertisertrackingenabledasyncenabled) | ✅ | Settings.setAdvertiserTrackingEnabled(enabled) |
+| [setAutoLogAppEventsEnabledAsync(enabled)](https://docs.expo.dev/versions/v45.0.0/sdk/facebook/#setautologappeventsenabledasyncenabled) | ✅ | Settings.setAutoLogAppEventsEnabled(enabled) |
+| [setUserDataAsync(userData)](https://docs.expo.dev/versions/v45.0.0/sdk/facebook/#setuserdataasyncuserdata) | ✅ | AppEventsLogger.setUserData(userData) |
+| [setUserIDAsync(userID)](https://docs.expo.dev/versions/v45.0.0/sdk/facebook/#setuseridasyncuserid) | ✅ | AppEventsLogger.setUserID(userID) |
 
 ## Example app
 To run the example app, you'll first need to setup the environment:
