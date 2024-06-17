@@ -12,7 +12,7 @@ buildscript {
             google()
         }
         dependencies {
-            classpath 'com.android.tools.build:gradle:7.3.0'
+            classpath 'com.android.tools.build:gradle:8.3.2'
         }
     }
 }
@@ -20,13 +20,17 @@ buildscript {
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion safeExtGet('compileSdkVersion', 33)
+    compileSdkVersion safeExtGet('compileSdkVersion', 34)
     defaultConfig {
         minSdkVersion safeExtGet('minSdkVersion', 16)
-        targetSdkVersion safeExtGet('targetSdkVersion', 31)
+        targetSdkVersion safeExtGet('targetSdkVersion', 34)
     }
     lintOptions {
         abortOnError false
+    }
+    def agpVersion = com.android.Version.ANDROID_GRADLE_PLUGIN_VERSION
+    if (agpVersion.tokenize('.')[0].toInteger() >= 7) {
+        namespace "com.facebook.reactnative.androidsdk"
     }
 }
 
@@ -44,7 +48,7 @@ repositories {
     google()
 }
 
-def FACEBOOK_SDK_VERSION = safeExtGet('facebookSdkVersion', '16.+')
+def FACEBOOK_SDK_VERSION = safeExtGet('facebookSdkVersion', '17.+')
 
 dependencies {
     //noinspection GradleDynamicVersion
